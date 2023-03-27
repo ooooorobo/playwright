@@ -74,6 +74,7 @@ export const WatchModeView: React.FC<{}> = ({
   const [runningState, setRunningState] = React.useState<{ testIds: Set<string>, itemSelectedByUser?: boolean } | undefined>();
   const [watchAll, setWatchAll] = useSetting<boolean>('watch-all', false);
   const [watchedTreeIds, setWatchedTreeIds] = React.useState<{ value: Set<string> }>({ value: new Set() });
+  const [useTrace, setUseTrace] = React.useState(false);
   const runTestPromiseChain = React.useRef(Promise.resolve());
   const runTestBacklog = React.useRef<Set<string>>(new Set());
 
@@ -139,7 +140,7 @@ export const WatchModeView: React.FC<{}> = ({
       setProgress({ total: testIds.size, passed: 0, failed: 0, skipped: 0 });
       setRunningState({ testIds });
 
-      await sendMessage('run', { testIds: [...testIds] });
+      await sendMessage('run', { testIds: [...testIds], trace: useTrace ? 'on' : 'off' });
       // Clear pending tests in case of interrupt.
       for (const test of testModel.rootSuite?.allTests() || []) {
         if (test.results[0]?.duration === -1)
@@ -175,6 +176,10 @@ export const WatchModeView: React.FC<{}> = ({
           <ToolbarButton icon='color-mode' title='Toggle color mode' onClick={() => toggleTheme()} />
           <ToolbarButton icon='refresh' title='Reload' onClick={() => reloadTests()} disabled={isRunningTest || isLoading}></ToolbarButton>
           <ToolbarButton icon='terminal' title='Toggle output' toggled={isShowingOutput} onClick={() => { setIsShowingOutput(!isShowingOutput); }} />
+        </Toolbar>
+        <Toolbar>
+          <h2>커스텀 섹션</h2>
+          <ToolbarButton icon='archive' title='Save trace' onClick={() => setUseTrace(prev => !prev)} toggled={useTrace} />
         </Toolbar>
         <FiltersView
           filterText={filterText}

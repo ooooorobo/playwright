@@ -134,8 +134,11 @@ class UIMode {
   private async _queueListOrRun(method: string, params: any) {
     if (method === 'list')
       await this._listTests();
-    if (method === 'run')
+    if (method === 'run') {
+      const override = this._config._internal.configCLIOverrides.use;
+      this._config._internal.configCLIOverrides.use = { ...override, trace: params.trace };
       await this._runTests(params.testIds);
+    }
   }
 
   private _dispatchEvent(message: any) {
